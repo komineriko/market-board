@@ -229,10 +229,10 @@ function loadPane(id){
   if (id === "summary") {
     const g = document.getElementById("summaryGrid");
     [
-      ["TVC:NI225","日経平均"], ["TSE:1306","TOPIX連動ETF"],
-      ["TSE:2516","グロース250ETF"], ["FX_IDC:USDJPY","ドル円"],
-      ["TVC:JP10Y","日本10年金利"], ["TSE:8035","東京エレクトロン"],
-      ["TSE:6857","アドバンテスト"], ["TSE:9984","ソフトバンクG"]
+      ["FX_IDC:USDJPY","ドル円"], ["AMEX:EWJ","日本株ETF(米国上場)"],
+      ["TSE:7203","トヨタ自動車"], ["TSE:8035","東京エレクトロン"],
+      ["TSE:6857","アドバンテスト"], ["TSE:9984","ソフトバンクG"],
+      ["TSE:8306","三菱UFJフィナンシャル"], ["TSE:9432","NTT"]
     ].forEach(([sym]) => {
       const card = document.createElement("div");
       card.className = "card";
