@@ -197,14 +197,14 @@ setInterval(showDate, 30000);
 /* ============ ティッカーテープ ============ */
 tvWidget(document.getElementById("tickerTape"), "ticker-tape", {
   symbols: [
-    {proName:"TVC:NI225", title:"日経平均"},
-    {proName:"TSE:1306", title:"TOPIX連動ETF"},
-    {proName:"TSE:2516", title:"グロース250ETF"},
     {proName:"FX_IDC:USDJPY", title:"ドル円"},
-    {proName:"TVC:JP10Y", title:"日10年金利"},
+    {proName:"AMEX:EWJ", title:"日本株ETF"},
+    {proName:"TSE:7203", title:"トヨタ"},
     {proName:"TSE:8035", title:"東エレク"},
     {proName:"TSE:6857", title:"アドテスト"},
-    {proName:"TSE:7203", title:"トヨタ"}
+    {proName:"TSE:9984", title:"ソフトバンクG"},
+    {proName:"TSE:8306", title:"三菱UFJ"},
+    {proName:"TSE:9432", title:"NTT"}
   ],
   showSymbolLogo: false, isTransparent: true,
   displayMode: "adaptive", colorTheme: "dark", locale: "ja"
@@ -245,13 +245,10 @@ function loadPane(id){
     });
   }
   if (id === "heatmap") {
-    tvWidget(document.getElementById("heatmapBox"), "stock-heatmap", {
-      exchanges: [], dataSource: "NIKKEI225", grouping: "sector",
-      blockSize: "market_cap_basic", blockColor: "change",
-      locale: "ja", symbolUrl: "", colorTheme: "dark",
-      hasTopBar: true, isDataSetEnabled: false, isZoomEnabled: true,
-      hasSymbolTooltip: true, isMonoSize: false,
-      width: "100%", height: "100%"
+    tvWidget(document.getElementById("heatmapBox"), "screener", {
+      width: "100%", height: "100%", defaultColumn: "overview",
+      defaultScreen: "change", showToolbar: true, locale: "ja",
+      market: "japan", colorTheme: "dark", isTransparent: true
     }, "100%");
   }
   if (id === "sector") {
@@ -284,7 +281,7 @@ function loadPane(id){
   }
   if (id === "news") {
     tvWidget(document.getElementById("newsBox"), "timeline", {
-      feedMode: "market", market: "stock", isTransparent: true,
+      feedMode: "symbol", symbol: "TVC:NI225", isTransparent: true,
       displayMode: "regular", colorTheme: "dark", locale: "ja",
       width: "100%", height: "100%"
     }, "100%");
