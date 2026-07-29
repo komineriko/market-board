@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="theme-color" content="#0a0e14">
+<title>MY MARKET BOARD JP</title>
+<style>
+  :root {
+    --bg: #0a0e14;
+    --panel: #111722;
+    --line: #1e2735;
+    --text: #e8edf4;
+    --dim: #8a97a8;
+    --accent: #5ec2ff;
+    --up: #26c281;
+    --down: #ff5252;
+    --tabbar-h: 58px;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  html, body { height: 100%; }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: "Hiragino Kaku Gothic ProN", "Hiragino Sans", "Noto Sans JP", sans-serif;
+    overscroll-behavior: none;
+  }
+  header {
+    position: sticky; top: 0; z-index: 20;
+    background: linear-gradient(180deg, #131b28, #0d1320);
+    border-bottom: 1px solid var(--line);
+    padding: calc(env(safe-area-inset-top) + 10px) 14px 8px;
+    display: flex; align-items: baseline; justify-content: space-between;
+  }
+  header h1 {
+    font-size: 15px; letter-spacing: 0.14em; font-weight: 800;
+    color: var(--accent);
+  }
+  header .date { font-size: 11px; color: var(--dim); font-variant-numeric: tabular-nums; }
+  header .reload {
+    background: none; border: 1px solid var(--line); color: var(--dim);
+    border-radius: 6px; font-size: 11px; padding: 3px 8px; margin-left: 8px;
+  }
+  header a.us {
+    color: var(--dim); font-size: 11px; text-decoration: none;
+    border: 1px solid var(--line); border-radius: 6px; padding: 3px 8px; margin-left: 6px;
+  }
+  main {
+    padding-bottom: calc(var(--tabbar-h) + env(safe-area-inset-bottom) + 8px);
+  }
+  .ticker { border-bottom: 1px solid var(--line); }
+  section.pane { display: none; padding: 10px 8px 20px; }
+  section.pane.active { display: block; }
+  .pane h2 {
+    font-size: 12px; color: var(--dim); font-weight: 600;
+    letter-spacing: 0.08em; margin: 6px 4px 10px;
+  }
+  .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+  .card {
+    background: var(--panel); border: 1px solid var(--line);
+    border-radius: 10px; overflow: hidden;
+  }
+  .tall { border-radius: 10px; overflow: hidden; border: 1px solid var(--line); }
+
+  .watch-add {
+    display: flex; gap: 8px; margin: 4px 4px 14px;
+  }
+  .watch-add input {
+    flex: 1; background: var(--panel); border: 1px solid var(--line);
+    border-radius: 8px; color: var(--text); font-size: 14px; padding: 10px 12px;
+  }
+  .watch-add input::placeholder { color: #5a6678; }
+  .watch-add button {
+    background: var(--accent); color: #0a1420; font-weight: 700;
+    border: none; border-radius: 8px; font-size: 14px; padding: 0 18px;
+  }
+  .watch-item { margin-bottom: 14px; }
+  .watch-head {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 0 4px 6px;
+  }
+  .watch-head .sym { font-size: 13px; font-weight: 700; letter-spacing: 0.04em; }
+  .watch-head .meta { font-size: 11px; color: var(--dim); }
+  .watch-head .del {
+    background: none; border: 1px solid var(--line); color: var(--down);
+    border-radius: 6px; font-size: 11px; padding: 3px 10px; margin-left: 10px;
+  }
+  .empty {
+    text-align: center; color: var(--dim); font-size: 13px;
+    padding: 40px 20px; line-height: 1.8;
+  }
+
+  nav {
+    position: fixed; left: 0; right: 0; bottom: 0; z-index: 30;
+    background: #0d1320; border-top: 2px solid var(--accent);
+    display: flex;
+    height: calc(var(--tabbar-h) + env(safe-area-inset-bottom));
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+  nav button {
+    flex: 1; background: none; border: none; color: var(--dim);
+    font-family: inherit; font-size: 10px; line-height: 1.3;
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    gap: 2px;
+  }
+  nav button .no {
+    font-size: 11px; font-weight: 800; font-style: italic;
+    color: #4a5568; font-family: Georgia, serif;
+  }
+  nav button.on { color: var(--text); }
+  nav button.on .no { color: var(--accent); }
+  .tv-wrap { min-height: 60px; }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>MY MARKET BOARD JP</h1>
+  <div>
+    <span class="date" id="nowDate"></span>
+    <a class="us" href="./">US版</a>
+    <button class="reload" onclick="location.reload()">更新</button>
+  </div>
+</header>
+
+<div class="ticker" id="tickerTape"></div>
+
+<main>
+  <section class="pane active" id="pane-summary">
+    <h2>1 ｜ サマリー（日本市場）</h2>
+    <div class="grid2" id="summaryGrid"></div>
+  </section>
+
+  <section class="pane" id="pane-heatmap">
+    <h2>2 ｜ 日経225 ヒートマップ（前日比）</h2>
+    <div class="tall" id="heatmapBox" style="height:72vh"></div>
+  </section>
+
+  <section class="pane" id="pane-sector">
+    <h2>3 ｜ 業種別ETF TOPIX-17（前日比）</h2>
+    <div class="tall" id="sectorBox"></div>
+  </section>
+
+  <section class="pane" id="pane-news">
+    <h2>4 ｜ マーケットニュース</h2>
+    <div class="tall" id="newsBox" style="height:72vh"></div>
+  </section>
+
+  <section class="pane" id="pane-watch">
+    <h2>5 ｜ 注目チャート（自分で追加）</h2>
+    <div class="watch-add">
+      <input id="symInput" placeholder="例: TSE:7203 / TSE:8035" autocapitalize="characters" autocomplete="off">
+      <button onclick="addSymbol()">追加</button>
+    </div>
+    <div id="watchList"></div>
+  </section>
+</main>
+
+<nav>
+  <button class="on" data-pane="summary"><span class="no">1</span>サマリー</button>
+  <button data-pane="heatmap"><span class="no">2</span>ヒートマップ</button>
+  <button data-pane="sector"><span class="no">3</span>セクター</button>
+  <button data-pane="news"><span class="no">4</span>ニュース</button>
+  <button data-pane="watch"><span class="no">5</span>注目</button>
+</nav>
+
+<script>
+/* ============ 共通: TradingViewウィジェット生成 ============ */
+function tvWidget(container, embedName, config, height) {
+  const wrap = document.createElement("div");
+  wrap.className = "tradingview-widget-container tv-wrap";
+  if (height) wrap.style.height = height;
+  const inner = document.createElement("div");
+  inner.className = "tradingview-widget-container__widget";
+  if (height) inner.style.height = "100%";
+  wrap.appendChild(inner);
+  const s = document.createElement("script");
+  s.type = "text/javascript";
+  s.async = true;
+  s.src = "https://s3.tradingview.com/external-embedding/embed-widget-" + embedName + ".js";
+  s.innerHTML = JSON.stringify(config);
+  wrap.appendChild(s);
+  container.appendChild(wrap);
+}
+
+/* ============ 日付表示 ============ */
+function pad(n){ return String(n).padStart(2,"0"); }
+function showDate(){
+  const d = new Date();
+  const w = ["日","月","火","水","木","金","土"][d.getDay()];
+  document.getElementById("nowDate").textContent =
+    `${d.getFullYear()}/${pad(d.getMonth()+1)}/${pad(d.getDate())}(${w}) ${pad(d.getHours())}:${pad(d.getMinutes())}`;
+}
+showDate();
+setInterval(showDate, 30000);
+
+/* ============ ティッカーテープ ============ */
+tvWidget(document.getElementById("tickerTape"), "ticker-tape", {
+  symbols: [
+    {proName:"TVC:NI225", title:"日経平均"},
+    {proName:"TSE:1306", title:"TOPIX連動ETF"},
+    {proName:"TSE:2516", title:"グロース250ETF"},
+    {proName:"FX_IDC:USDJPY", title:"ドル円"},
+    {proName:"TVC:JP10Y", title:"日10年金利"},
+    {proName:"TSE:8035", title:"東エレク"},
+    {proName:"TSE:6857", title:"アドテスト"},
+    {proName:"TSE:7203", title:"トヨタ"}
+  ],
+  showSymbolLogo: false, isTransparent: true,
+  displayMode: "adaptive", colorTheme: "dark", locale: "ja"
+});
