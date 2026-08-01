@@ -197,3 +197,122 @@ setInterval(showDate, 30000);
 /* ============ ティッカーテープ ============ */
 tvWidget(document.getElementById("tickerTape"), "ticker-tape", {
   symbols: [
+{proName:"FX_IDC:USDJPY", title:"ドル円"},
+    {proName:"AMEX:EWJ", title:"日本株ETF"},
+    {proName:"TSE:7203", title:"トヨタ"},
+    {proName:"TSE:8035", title:"東エレク"},
+    {proName:"TSE:6857", title:"アドテスト"},
+    {proName:"TSE:9984", title:"ソフトバンクG"},
+    {proName:"TSE:8306", title:"三菱UFJ"},
+    {proName:"TSE:9432", title:"NTT"}
+  ],
+  showSymbolLogo: false, isTransparent: true,
+  displayMode: "adaptive", colorTheme: "dark", locale: "ja"
+});
+
+/* ============ タブ制御(遅延ロード) ============ */
+const loaded = { summary:false, heatmap:false, sector:false, news:false, watch:false };
+document.querySelectorAll("nav button").forEach(btn => {
+  btn.addEventListener("click", () => {
+    document.querySelectorAll("nav button").forEach(b => b.classList.remove("on"));
+    btn.classList.add("on");
+    document.querySelectorAll("section.pane").forEach(p => p.classList.remove("active"));
+    const id = btn.dataset.pane;
+    document.getElementById("pane-" + id).classList.add("active");
+    loadPane(id);
+    window.scrollTo(0, 0);
+  });
+});
+
+function loadPane(id){
+  if (loaded[id]) return;
+  loaded[id] = true;
+  if (id === "summary") {
+    const g = document.getElementById("summaryGrid");
+    [
+      ["FX_IDC:USDJPY","ドル円"], ["AMEX:EWJ","日本株ETF(米国上場)"],
+      ["TSE:7203","トヨタ自動車"], ["TSE:8035","東京エレクトロン"],
+      ["TSE:6857","アドバンテスト"], ["TSE:9984","ソフトバンクG"],
+      ["TSE:8306","三菱UFJフィナンシャル"], ["TSE:9432","NTT"]
+    ].forEach(([sym]) => {
+      const card = document.createElement("div");
+      card.className = "card";
+      g.appendChild(card);
+      tvWidget(card, "mini-symbol-overview", {
+        symbol: sym, width: "100%", height: 200,
+        locale: "ja", dateRange: "3M", colorTheme: "dark",
+        isTransparent: true, autosize: false, chartOnly: false
+      });
+    });
+  }
+  if (id === "heatmap") {
+    tvWidget(document.getElementById("heatmapBox"), "screener", {
+      width: "100%", height: "100%", defaultColumn: "overview",
+      defaultScreen: "change", showToolbar: true, locale: "ja",
+      market: "japan", colorTheme: "dark", isTransparent: true
+    }, "100%");
+  }
+  if (id === "sector") {
+    tvWidget(document.getElementById("sectorBox"), "market-quotes", {
+      width: "100%", height: 760, isTransparent: true,
+      colorTheme: "dark", locale: "ja", showSymbolLogo: false,
+      symbolsGroups: [{
+        name: "TOPIX-17 業種別ETF",
+        symbols: [
+          {name:"TSE:1625", displayName:"1625 電機・精密"},
+          {name:"TSE:1626", displayName:"1626 情報通信・サービス"},
+          {name:"TSE:1622", displayName:"1622 自動車・輸送機"},
+          {name:"TSE:1631", displayName:"1631 銀行"},
+          {name:"TSE:1632", displayName:"1632 金融(除く銀行)"},
+          {name:"TSE:1629", displayName:"1629 商社・卸売"},
+          {name:"TSE:1624", displayName:"1624 機械"},
+          {name:"TSE:1620", displayName:"1620 素材・化学"},
+          {name:"TSE:1621", displayName:"1621 医薬品"},
+          {name:"TSE:1617", displayName:"1617 食品"},
+          {name:"TSE:1630", displayName:"1630 小売"},
+          {name:"TSE:1628", displayName:"1628 運輸・物流"},
+          {name:"TSE:1623", displayName:"1623 鉄鋼・非鉄"},
+          {name:"TSE:1619", displayName:"1619 建設・資材"},
+          {name:"TSE:1618", displayName:"1618 エネルギー資源"},
+          {name:"TSE:1627", displayName:"1627 電力・ガス"},
+          {name:"TSE:1633", displayName:"1633 不動産"}
+        ]
+      }]
+    });
+  }
+  if (id === "news") {
+    tvWidget(document.getElementById("newsBox"), "timeline", {
+      feedMode: "symbol", symbol: "TVC:NI225", isTransparent: true,
+      displayMode: "regular", colorTheme: "dark", locale: "ja",
+      width: "100%", height: "100%"
+    }, "100%");
+  }
+  if (id === "watch") renderWatch();
+}
+
+/* ============ 注目チャート(localStorage/日本株版は別キー) ============ */
+const WKEY = "watchChartsJP_v1";
+function getWatch(){
+  try { return JSON.parse(localStorage.getItem(WKEY)) || []; }
+  catch(e){ return []; }
+}
+function setWatch(list){ localStorage.setItem(WKEY, JSON.stringify(list)); }
+
+function addSymbol(){
+  const inp = document.getElementById("symInput");
+  let sym = inp.value.trim().toUpperCase();
+  if (!sym) return;
+  if (/^[0-9]{4}[A-Z]?$/.test(sym)) sym = "TSE:" + sym;
+  const list = getWatch();
+  if (list.some(x => x.s === sym)) { inp.value = ""; return; }
+  const d = new Date();
+  list.unshift({ s: sym, d: `${d.getFullYear()}/${pad(d.getMonth()+1)}/${pad(d.getDate())}` });
+  setWatch(list);
+  inp.value = "";
+  renderWatch();
+}
+
+function removeSymbol(sym){
+  setWatch(getWatch().filter(x => x.s !== sym));
+  renderWatch();
+}
