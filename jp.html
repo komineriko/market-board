@@ -343,15 +343,19 @@ function renderWatch(){
     chart.style.height = "560px";
     wrap.appendChild(chart);
     box.appendChild(wrap);
-    const cid = "tv_watch_" + idx + "_" + item.s.replace(/[^A-Za-z0-9]/g, "_");
-    tvWidget(chart, "advanced-chart", {
-      symbol: item.s, interval: "D", timezone: "Asia/Tokyo",
-      theme: "dark", style: "1", locale: "ja",
-      hide_side_toolbar: true, hide_top_toolbar: false,
-      allow_symbol_change: false, save_image: false,
-      withdateranges: true, autosize: true, support_host: "https://www.tradingview.com",
-      studies: ["MACD@tv-basicstudies", "RSI@tv-basicstudies"]
-    }, "100%", cid);
+    const iframe = document.createElement("iframe");
+    const studies = encodeURIComponent(JSON.stringify(["MACD@tv-basicstudies","RSI@tv-basicstudies"]));
+    iframe.src = "https://s.tradingview.com/widgetembed/?symbol=" + encodeURIComponent(item.s) +
+      "&interval=D&hidesidetoolbar=1&symboledit=0&saveimage=0&toolbarbg=131722" +
+      "&studies=" + studies +
+      "&theme=dark&style=1&timezone=" + encodeURIComponent("Asia/Tokyo") +
+      "&withdateranges=1&locale=ja&hideideas=1";
+    iframe.style.width = "100%";
+    iframe.style.height = "100%";
+    iframe.style.border = "none";
+    iframe.setAttribute("allowtransparency", "true");
+    iframe.setAttribute("scrolling", "no");
+    chart.appendChild(iframe);
   });
 }
 
