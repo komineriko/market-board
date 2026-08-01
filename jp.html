@@ -316,3 +316,85 @@ function removeSymbol(sym){
   setWatch(getWatch().filter(x => x.s !== sym));
   renderWatch();
 }
+function renderWatch(){
+  const box = document.getElementById("watchList");
+  box.innerHTML = "";
+  const list = getWatch();
+  if (!list.length) {
+    box.innerHTML = '<div class="empty">まだ登録がありません。<br>上の欄に銘柄コードを入力して「追加」<br>（例: 7203 / 8035 ※4桁だけでもOK）</div>';
+    return;
+  }
+
+  function renderOne(index){
+    if (index >= list.length) return;
+    const item = list[index];
+    const wrap = document.createElement("div");
+    wrap.className = "watch-item";
+    const head = document.createElement("div");
+    head.className = "watch-head";
+    head.innerHTML = `<span class="sym">${item.s}</span>
+      <span class="meta">${item.d} 追加
+        <button class="del" onclick="removeSymbol('${item.s}')">削除</button></span>`;
+    wrap.appendChild(head);
+    const chart = document.createElement("div");
+    chart.className = "tall";
+    chart.style.height = "560px";
+    wrap.appendChild(chart);
+    box.appendChild(wrap);
+
+    const cid = "tvw_jp_" + index + "_" + Date.now();
+    const inner = document.createElement("div");
+    inner.className = "tradingview-widget-container__widget";
+    inner.style.height = "100%";
+    inner.id = cid;
+    const wrapDiv = document.createElement("div");
+    wrapDiv.className = "tradingview-widget-container tv-wrap";
+    wrapDiv.style.height = "100%";
+    wrapDiv.appendChild(inner);
+    chart.appendChild(wrapDiv);
+
+    const s = document.createElement("script");
+    s.type = "text/javascript";
+    s.async = true;
+    s.src = "https://s3.tradingview.com/external-embedding/embed-widget-advanced-chart.js";
+    s.innerHTML = JSON.stringify({
+      container_id: cid,
+      symbol: item.s, interval: "D", timezone: "Asia/Tokyo",
+      theme: "dark", style: "1", locale: "ja",
+      hide_side_toolbar: true, hide_top_toolbar: false,
+      allow_symbol_change: false, save_image: false,
+      withdateranges: true, autosize: true,
+      support_host: "https://www.tradingview.com",
+      studies: ["MACD@tv-basicstudies", "RSI@tv-basicstudies"]
+    });
+    let advanced = false;
+    const goNext = () => { if (!advanced) { advanced = true; renderOne(index + 1); } };
+    s.onload = () => setTimeout(goNext, 500);
+    s.onerror = goNext;
+    wrapDiv.appendChild(s);
+    setTimeout(goNext, 1800);
+  }
+
+  renderOne(0);
+}
+
+/* ============ 毎日16:00 自動リロード(日本株版) ============ */
+const RKEY = "lastAutoReloadJP";
+function todayStr(){
+  const d = new Date();
+  return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`;
+}
+setInterval(() => {
+  const d = new Date();
+  const mins = d.getHours() * 60 + d.getMinutes();
+  if (mins >= 960 && mins <= 990 && localStorage.getItem(RKEY) !== todayStr()) {
+    localStorage.setItem(RKEY, todayStr());
+    location.reload();
+  }
+}, 20000);
+
+/* 初期タブロード */
+loadPane("summary");
+</script>
+</body>
+</html>
